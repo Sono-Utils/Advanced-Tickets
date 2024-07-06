@@ -27,7 +27,7 @@ client.on('ready', ready => {
                 console.log('Started refreshing application (/) commands.');
         
                 await rest.put(
-                    Routes.applicationCommands(clientId),
+                    Routes.applicationCommands('1259168067989143602'),
                     { body: commands },
                 );
         
