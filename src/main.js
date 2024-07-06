@@ -1,4 +1,4 @@
-const { Client, IntentsBitField, EmbedBuilder, REST, Routes } = require('discord.js');
+const { Client, IntentsBitField, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField, REST, Routes } = require('discord.js');
 require('dotenv').config();
 
 const client = new Client({
@@ -67,6 +67,68 @@ client.on('ready', ready => {
             interaction.reply({embeds: [aboutCommand]});
         }
     });
+
+    client.on('messageCreate', async (message) => {
+        if (message.content === '!ticket') {
+          const embed = new EmbedBuilder()
+            .setTitle('Ticket System')
+            .setDescription('Klicke auf den Button unten, um ein Ticket zu erstellen.');
+      
+          const button = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId('create_ticket')
+                .setLabel('Ticket erstellen')
+                .setStyle(ButtonStyle.Primary)
+            );
+      
+          await message.channel.send({ embeds: [embed], components: [button] });
+        }
+      });
+      
+      client.on('interactionCreate', async (interaction) => {
+        if (!interaction.isButton()) return;
+      
+        if (interaction.customId === 'create_ticket') {
+          const ticketChannel = await interaction.guild.channels.create({
+            name: `ticket-${interaction.user.username}`,
+            type: 0, // 0 steht für GUILD_TEXT (Textkanal)
+            permissionOverwrites: [
+              {
+                id: interaction.guild.id,
+                deny: [PermissionsBitField.Flags.ViewChannel],
+              },
+              {
+                id: interaction.user.id,
+                allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ReadMessageHistory],
+              },
+              {
+                id: client.user.id,
+                allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ReadMessageHistory],
+              },
+            ],
+          });
+      
+          const ticketEmbed = new EmbedBuilder()
+            .setTitle('Ticket')
+            .setDescription('Ein Mitarbeiter wird bald bei dir sein.\nKlicke auf den Button unten, um das Ticket zu schließen.');
+      
+          const closeButton = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId('close_ticket')
+                .setLabel('Ticket schließen')
+                .setStyle(ButtonStyle.Danger)
+            );
+      
+          await ticketChannel.send({ embeds: [ticketEmbed], components: [closeButton] });
+      
+          await interaction.reply({ content: `Dein Ticket wurde erstellt: ${ticketChannel}`, ephemeral: true });
+        } else if (interaction.customId === 'close_ticket') {
+          await interaction.channel.delete();
+        }
+      });
+      
 
         
 
