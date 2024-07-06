@@ -1,0 +1,16 @@
+{
+  "name": "advanced-tickets",
+  "version": "1.0.0",
+  "description": "Advanced Tickets is a discord bot. With this bot you can customize your tickets.",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5"
+  }
+}
