@@ -36,6 +36,10 @@ client.on('ready', ready => {
             {
                 name: 'about',
                 description: 'Gives you Infomations about the Bot',
+            },
+            {
+                name: 'ticket-embed',
+                description: 'Shows the Ticket Embed'
             }
         ];
         
@@ -61,30 +65,28 @@ client.on('ready', ready => {
         if(!interaction.isCommand()) return;
 
 
-        const { commandName } = interaction;
+        const { commandName, member } = interaction;
 
         if (commandName === 'about') {
-            interaction.reply({embeds: [aboutCommand]});
-        }
+              interaction.reply({embeds: [aboutCommand]});
+            } else if(commandName === 'ticket-embed') {
+            if(!member.permissions.has('ADMINISTRATOR')) {
+                const ticketCreateEmbed = new EmbedBuilder()
+                  .setTitle('Ticket System')
+                  .setDescription('Klicke auf den Button unten, um ein Ticket zu erstellen.');
+            
+                const ticketCreateButton = new ActionRowBuilder()
+                  .addComponents(
+                    new ButtonBuilder()
+                      .setCustomId('create_ticket')
+                      .setLabel('Ticket erstellen')
+                      .setStyle(ButtonStyle.Primary)
+                  );
+            
+                message.channel.send({ embeds: [ticketCreateEmbed], components: [ticketCreateButton] })
+            }
+        }   
     });
-
-    client.on('messageCreate', async (message) => {
-        if (message.content === '!ticket') {
-          const embed = new EmbedBuilder()
-            .setTitle('Ticket System')
-            .setDescription('Klicke auf den Button unten, um ein Ticket zu erstellen.');
-      
-          const button = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId('create_ticket')
-                .setLabel('Ticket erstellen')
-                .setStyle(ButtonStyle.Primary)
-            );
-      
-          await message.channel.send({ embeds: [embed], components: [button] });
-        }
-      });
       
       client.on('interactionCreate', async (interaction) => {
         if (!interaction.isButton()) return;
