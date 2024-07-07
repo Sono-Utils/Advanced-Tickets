@@ -61,16 +61,18 @@ client.on('ready', ready => {
         })();
     });
 
-    client.on('interactionCreate', interaction => {
+    client.on('interactionCreate',async interaction => {
         if(!interaction.isCommand()) return;
 
 
-        const { commandName, member } = interaction;
+        const { commandName } = interaction;
 
         if (commandName === 'about') {
-              interaction.reply({embeds: [aboutCommand]});
+
+              await interaction.reply({embeds: [aboutCommand]});
+
             } else if(commandName === 'ticket-embed') {
-            if(!member.permissions.has('ADMINISTRATOR')) {
+            
                 const ticketCreateEmbed = new EmbedBuilder()
                   .setTitle('Ticket System')
                   .setDescription('Klicke auf den Button unten, um ein Ticket zu erstellen.');
@@ -83,9 +85,8 @@ client.on('ready', ready => {
                       .setStyle(ButtonStyle.Primary)
                   );
             
-                message.channel.send({ embeds: [ticketCreateEmbed], components: [ticketCreateButton] })
-            }
-        }   
+                await interaction.reply({ embeds: [ticketCreateEmbed], components: [ticketCreateButton] })
+            }  
     });
       
       client.on('interactionCreate', async (interaction) => {
