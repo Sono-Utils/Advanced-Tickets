@@ -1,5 +1,8 @@
 const { Client, IntentsBitField, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField, REST, Routes } = require('discord.js');
 require('dotenv').config();
+const axios = require('axios');
+
+const API_BASE_URL = 'https://imaginary-wakeful-busby.glitch.me';
 
 const client = new Client({
     intents: [
@@ -33,6 +36,18 @@ client.on('ready', ready => {
         console.log(`Logged in as ${client.user.tag}`)
 
         const commands = [
+          {
+            name: 'ticketmessage',
+            description: 'Setze die Ticketnachricht',
+            options: [
+              {
+                name: 'message',
+                type: 3, // STRING
+                description: 'Die Nachricht für das Ticket',
+                required: true
+              },
+            ],
+          },
             {
                 name: 'about',
                 description: 'Gives you Infomations about the Bot',
@@ -40,7 +55,7 @@ client.on('ready', ready => {
             {
                 name: 'ticket-embed',
                 description: 'Shows the Ticket Embed'
-            }
+            },
         ];
         
         const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
@@ -72,10 +87,13 @@ client.on('ready', ready => {
               await interaction.reply({embeds: [aboutCommand]});
 
             } else if(commandName === 'ticket-embed') {
+
+              const response = await axios.get(`${API_BASE_URL}/settings/${interaction.guild.id}`);
+              const customMessage = response.data.message || 'Klicke auf den Button unten, um ein Ticket zu erstellen.';
             
                 const ticketCreateEmbed = new EmbedBuilder()
                   .setTitle('Ticket System')
-                  .setDescription('Klicke auf den Button unten, um ein Ticket zu erstellen.');
+                  .setDescription(customMessage);
             
                 const ticketCreateButton = new ActionRowBuilder()
                   .addComponents(
@@ -86,7 +104,25 @@ client.on('ready', ready => {
                   );
             
                 await interaction.reply({ embeds: [ticketCreateEmbed], components: [ticketCreateButton] })
-            }  
+            } else if (commandName === 'ticketmessage') {
+              if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+                return interaction.reply('Du hast keine Berechtigung, diesen Befehl zu verwenden.');
+              }
+          
+              const customMessage = interaction.options.getString('message');
+          
+              try {
+                await axios.post(`${API_BASE_URL}/settings`, {
+                  guild_id: interaction.guild.id,
+                  message: customMessage,
+                });
+                await interaction.reply('Die Ticket-Nachricht wurde aktualisiert.');
+              } catch (error) {
+                console.error(error);
+                await interaction.reply('Es gab einen Fehler beim Aktualisieren der Nachricht.');
+              }
+            }
+           
     });
       
       client.on('interactionCreate', async (interaction) => {
